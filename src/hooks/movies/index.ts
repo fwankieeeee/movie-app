@@ -1,0 +1,1 @@
+export { useFetchMovies } from './useFetchMovies';
