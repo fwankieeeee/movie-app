@@ -8,8 +8,17 @@ type MovieArgs = {
 const {ODBM_API_KEY = 'b9bd48a6', ODBM_API_URL = 'https://www.omdbapi.com/'} =
   process.env;
 
+type TMovieData = {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: string;
+  Poster: string;
+  [key: string]: any;
+};
+
 export const useFetchMovies = () => {
-  const [fetchedData, setFetchedData] = useState<Record<string, any>[]>([]);
+  const [fetchedData, setFetchedData] = useState<TMovieData[]>([]);
   const [dataCount, setDataCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,12 +51,13 @@ export const useFetchMovies = () => {
 
       if (data.Error) throw data;
 
-      const newData = [...fetchedData,...(data.Search ?? [])];
+      const newData = [...fetchedData, ...(data.Search ?? [])];
       const uniqueData = Array.from(
         new Map(newData.map(item => [item.imdbID, item])).values(),
       );
       setFetchedData(uniqueData);
       setDataCount(Number(data.totalResults));
+      return uniqueData;
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'AbortError') {
         console.error('Request aborted');
@@ -58,17 +68,16 @@ export const useFetchMovies = () => {
       if (typeof error === 'object' && error !== null && 'Error' in error) {
         setError((error as {Error: string}).Error);
         setDataCount(0);
-        setFetchedData([])
+        setFetchedData([]);
       } else {
         setError('An unknown error occurred');
       }
-      
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleFetchMovieById = async (movieId: string) => {
+  const handleFetchMovieById = async (movieId: string): Promise<TMovieData | null> => {
     setIsLoading(true);
     try {
       // Create a new AbortController for the current request
@@ -89,6 +98,7 @@ export const useFetchMovies = () => {
 
       const data = await response.json();
       setFetchedData(data);
+      return data;
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'AbortError') {
         console.error('Request aborted');
@@ -101,6 +111,7 @@ export const useFetchMovies = () => {
       } else {
         setError('An unknown error occurred');
       }
+      return null;
     } finally {
       setIsLoading(false);
     }

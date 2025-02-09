@@ -154,9 +154,9 @@ const Search = () => {
           )}
         </View>
       </View>
-      {fetchedData && (fetchedData as Array<Record<string, any>>).length > 0 ? (
+      {fetchedData && fetchedData.length > 0 ? (
         <FlatList
-          data={fetchedData as Array<Record<string, any>>}
+          data={fetchedData}
           numColumns={2}
           showsVerticalScrollIndicator
           columnWrapperStyle-={styles.columnWrapper}

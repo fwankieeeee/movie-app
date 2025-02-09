@@ -1,6 +1,7 @@
 import { SafeScreen } from '@/components';
 import PATHS from '@/navigation/paths';
 import {
+  DrawerActions,
   NavigationProp,
   ParamListBase,
   useNavigation,
@@ -12,18 +13,18 @@ import styles from './styles';
 const Home = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
-  // TODO: Implement search
   const handleOnPressSearch = () => {
     navigation.navigate(PATHS.Search);
   };
 
-  // TODO: Implement drawer
-  const handleOnPressDrawerOpen = () => {};
+  const handleOnPressDrawerOpen = () => {
+    navigation.dispatch(DrawerActions.toggleDrawer());
+  };
 
   return (
     <SafeScreen>
-      {/* Search Icon and Title */}
       <View style={styles.headerView}>
+        {/* TODO: make a component out of this */}
         <TouchableOpacity onPress={handleOnPressDrawerOpen}>
           <Bars3Icon strokeWidth={2} size={20} color="#fff" />
         </TouchableOpacity>

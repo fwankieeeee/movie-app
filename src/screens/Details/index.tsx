@@ -2,6 +2,7 @@ import {SafeScreen} from '@/components';
 import {useFetchMovies} from '@/hooks';
 import {RootStackParamList} from '@/navigation/types';
 import {favoritesStorage} from '@/services/storage';
+import getScoreColor from '@/utils/getScoreColor';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
   RouteProp,
@@ -18,23 +19,38 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {ChevronLeftIcon, StarIcon} from 'react-native-heroicons/solid';
-import styles from './styles';
+import {HeartIcon as HeartOutlineIcon} from 'react-native-heroicons/outline';
 import {
-  HeartIcon as HeartOutlineIcon,
-  XCircleIcon,
-} from 'react-native-heroicons/outline';
-import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
-import getScoreColor from '@/utils/getScoreColor';
+  ChevronLeftIcon,
+  HeartIcon as HeartSolidIcon,
+  StarIcon,
+} from 'react-native-heroicons/solid';
+import styles from './styles';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'details'>;
 
 const Details = () => {
   const navigation = useNavigation();
   const route = useRoute<DetailsScreenRouteProp>();
-  const {handleFetchMovieById, isLoading, fetchedData} = useFetchMovies();
-
   const movieId = route.params.imdbID;
+  const {handleFetchMovieById} = useFetchMovies();
+
+  const queryClient = useQueryClient();
+  const {
+    data: fetchedData,
+    isSuccess: isSuccessFetchMovieById,
+    isLoading: isLoadingFetchMovieById,
+  } = useQuery({
+    queryKey: ['movie', movieId],
+    queryFn: () => handleFetchMovieById(movieId),
+  });
+
+  useEffect(() => {
+    if (isSuccessFetchMovieById) {
+      queryClient.invalidateQueries({queryKey: ['movies']});
+    }
+  }, [isSuccessFetchMovieById, queryClient]);
 
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -82,7 +98,7 @@ const Details = () => {
           </TouchableOpacity>
         </View>
 
-        {isLoading ? (
+        {isLoadingFetchMovieById ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#fff" />
           </View>
@@ -100,7 +116,7 @@ const Details = () => {
                 resizeMode="cover"
               />
               <View style={styles.posterOverlay}>
-                <Text style={styles.overlayTitle}>{fetchedData.Title}</Text>
+                <Text style={styles.overlayTitle}>{fetchedData?.Title}</Text>
                 <Text style={styles.overlayYear}>{fetchedData.Year}</Text>
               </View>
             </View>
