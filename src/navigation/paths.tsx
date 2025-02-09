@@ -4,6 +4,7 @@ const PATHS = {
   Details: 'details',
   Favorites: 'favorites',
   Search: 'search',
+  MoviesTabs: 'moviestabs'
 } as const;
 
 export default PATHS;

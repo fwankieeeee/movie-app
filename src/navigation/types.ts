@@ -9,6 +9,7 @@ export type RootStackParamList = {
   [PATHS.Favorites]: undefined;
   [PATHS.RootDrawer]: undefined;
   [PATHS.Search]: undefined;
+  [PATHS.MoviesTabs]: undefined;
 };
 
 export type RootScreenProps<
