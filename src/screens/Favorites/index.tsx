@@ -1,7 +1,6 @@
-import { MovieCard, SafeScreen } from '@/components';
-import PATHS from '@/navigation/paths';
-import { fetchMovieById } from '@/services/api';
-import { favoritesStorage } from '@/services/storage';
+import {MovieCard, SafeScreen} from '@/components';
+import {fetchMovieById} from '@/services/api';
+import {favoritesStorage} from '@/services/storage';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
   NavigationProp,
@@ -9,12 +8,9 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import { useQueries } from '@tanstack/react-query';
-import React, { useCallback, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'react-native-elements';
-import { HeartIcon as HeartOutlineIcon } from 'react-native-heroicons/outline';
-import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
+import {useQueries} from '@tanstack/react-query';
+import React, {useCallback, useState} from 'react';
+import {FlatList, Text, View} from 'react-native';
 import homeStyles from '../Home/styles';
 import styles from './styles';
 
@@ -33,12 +29,10 @@ const Favorites = () => {
     })),
   });
 
-  const [localFavorites, setLocalFavorites] = useState([]);
-
   useFocusEffect(
     useCallback(() => {
       setFavoritesList(getFavorites());
-    }, [navigation, localFavorites]),
+    }, [navigation]),
   );
 
   const fetchedMoviesData = favoritesQueries.reduce((acc: any, item) => {
@@ -49,22 +43,8 @@ const Favorites = () => {
     return acc;
   }, []);
 
-  // handlers
-  const handleOnPressCardPoster = (imdbID: string) => {
-    navigation.navigate(PATHS.Details, {imdbID});
-  };
-
-  const toggleFavorite = (movieId: string) => {
-    const favoritesList = getFavorites();
-    const newFavorites = favoritesList.includes(movieId)
-      ? favoritesList.filter((id: string) => id !== movieId)
-      : [...favoritesList, movieId];
-    setLocalFavorites(newFavorites);
-    favoritesStorage.set('favorites', JSON.stringify(newFavorites));
-  };
-
   const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
-    return <MovieCard navigation={navigation} item={item} />
+    return <MovieCard navigation={navigation} item={item} />;
   };
 
   return (
@@ -72,14 +52,23 @@ const Favorites = () => {
       <View style={homeStyles.headerView}>
         <Text style={homeStyles.headerTitle}>Favorites</Text>
       </View>
-      <FlatList
-        data={fetchedMoviesData}
-        numColumns={2}
-        showsVerticalScrollIndicator
-        columnWrapperStyle-={styles.columnWrapper}
-        renderItem={renderItem}
-        keyExtractor={item => item.imdbID}
-      />
+      {fetchedMoviesData.length > 0 ? (
+        <FlatList
+          data={fetchedMoviesData}
+          numColumns={2}
+          showsVerticalScrollIndicator
+          columnWrapperStyle-={styles.columnWrapper}
+          renderItem={renderItem}
+          keyExtractor={item => item.imdbID}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No Favorites Yet</Text>
+          <Text style={styles.emptyText}>
+            Start adding movies to your favorites by tapping the movie card's heart icon!
+          </Text>
+        </View>
+      )}
     </SafeScreen>
   );
 };

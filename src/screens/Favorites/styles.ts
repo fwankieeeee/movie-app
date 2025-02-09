@@ -25,7 +25,12 @@ export default StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
   },
-
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
   skeletonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -65,10 +70,14 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   emptyText: {
-    fontSize: 18,
-    color: '#888',
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    paddingHorizontal: 32,
+    lineHeight: 24,
   },
   container: {
     flex: 1,
