@@ -75,6 +75,7 @@ const Filter = () => {
     setSortField('Title');
     setSortOrder('asc');
     setSelectedType('movie');
+    onApplyFilter(null);
     filtersStorage.delete('filters');
   };
 
@@ -155,7 +156,9 @@ const Filter = () => {
         <TouchableOpacity
           style={[styles.applyButton, styles.resetButton]}
           onPress={handleResetFilters}>
-          <Text style={[styles.applyButtonText, styles.resetButtonText]}>Reset Filters</Text>
+          <Text style={[styles.applyButtonText, styles.resetButtonText]}>
+            Reset Filters
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeScreen>

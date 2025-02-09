@@ -1,4 +1,4 @@
-import { SafeScreen } from '@/components';
+import { MovieCard, SafeScreen } from '@/components';
 import PATHS from '@/navigation/paths';
 import { fetchMovieById } from '@/services/api';
 import { favoritesStorage } from '@/services/storage';
@@ -10,7 +10,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { useQueries } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'react-native-elements';
 import { HeartIcon as HeartOutlineIcon } from 'react-native-heroicons/outline';
@@ -36,7 +36,7 @@ const Favorites = () => {
   const [localFavorites, setLocalFavorites] = useState([]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       setFavoritesList(getFavorites());
     }, [navigation, localFavorites]),
   );
@@ -64,35 +64,7 @@ const Favorites = () => {
   };
 
   const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
-    const favoritesList = getStoredObjects(favoritesStorage, 'favorites');
-    const isFavorite =
-      favoritesList && (favoritesList as string[]).includes(item.imdbID);
-    return (
-      <TouchableOpacity
-        style={styles.cardContainer}
-        onPress={() => handleOnPressCardPoster(item.imdbID)}>
-        <Image
-          source={{uri: item.Poster}}
-          style={styles.posterImage}
-          resizeMode="cover"
-        />
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={() => toggleFavorite(item.imdbID)}>
-          {isFavorite ? (
-            <HeartSolidIcon size={24} color="red" />
-          ) : (
-            <HeartOutlineIcon size={24} color="white" />
-          )}
-        </TouchableOpacity>
-        <View style={styles.infoContainer}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.Title}
-          </Text>
-          <Text style={styles.year}>{item.Year}</Text>
-        </View>
-      </TouchableOpacity>
-    );
+    return <MovieCard navigation={navigation} item={item} />
   };
 
   return (

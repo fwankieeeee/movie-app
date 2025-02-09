@@ -1,18 +1,15 @@
-import {SafeScreen} from '@/components';
-import {useGetMovies} from '@/hooks';
-import {useDebounce} from '@/hooks/debounce';
+import { MovieCard, SafeScreen } from '@/components';
+import { useGetMovies } from '@/hooks';
+import { useDebounce } from '@/hooks/debounce';
 import PATHS from '@/navigation/paths';
-import {favoritesStorage, recentSearchStorage} from '@/services/storage';
-import {SortOption} from '@/types';
-import getStoredObjects from '@/utils/getStoredObject';
+import { SortOption } from '@/types';
 import {
-  DrawerActions,
   NavigationProp,
   ParamListBase,
-  useNavigation,
+  useNavigation
 } from '@react-navigation/native';
-import {useQueryClient} from '@tanstack/react-query';
-import {useEffect, useMemo, useState} from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -22,14 +19,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {Image} from 'react-native-elements';
+import { Image } from 'react-native-elements';
 import {
   ChevronLeftIcon,
   FunnelIcon,
-  HeartIcon as HeartOutlineIcon,
-  XCircleIcon,
+  XCircleIcon
 } from 'react-native-heroicons/outline';
-import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
 import styles from './styles';
 
 type TFilters = SortOption & {type: 'movie' | 'episodes' | 'series'};
@@ -37,7 +32,6 @@ type TFilters = SortOption & {type: 'movie' | 'episodes' | 'series'};
 const Search = () => {
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
-  const [, setFavorites] = useState([]);
   const [filters, setFilters] = useState<TFilters | null>(null);
 
   const debouncedText = useDebounce(searchText.toLowerCase(), 500);
@@ -46,6 +40,7 @@ const Search = () => {
     isLoading,
     isFetching,
     isError: isErrorGetMovies,
+    isSuccess: isSuccessGetMovies,
     error,
     hasNextPage,
     refetch,
@@ -96,16 +91,6 @@ const Search = () => {
     });
   };
 
-  const handleOnPressCardPoster = (imdbID: string) => {
-    const recentSearchesIds =
-      getStoredObjects(recentSearchStorage, 'recent') ?? [];
-    recentSearchStorage.set(
-      'recent',
-      JSON.stringify([...recentSearchesIds, imdbID]),
-    );
-    navigation.navigate(PATHS.Details, {imdbID});
-  };
-
   const handleOnChangeText = (text: string) => {
     setSearchText(text);
   };
@@ -128,46 +113,8 @@ const Search = () => {
     navigation.goBack();
   };
 
-  // helpers
-  const toggleFavorite = (movieId: string) => {
-    const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
-    const newFavorites = favoritesList.includes(movieId)
-      ? favoritesList.filter((id: string) => id !== movieId)
-      : [...favoritesList, movieId];
-    setFavorites(newFavorites);
-    favoritesStorage.set('favorites', JSON.stringify(newFavorites));
-  };
-
   const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
-    const favoritesList = getStoredObjects(favoritesStorage, 'favorites');
-    const isFavorite =
-      favoritesList && (favoritesList as string[]).includes(item.imdbID);
-    return (
-      <TouchableOpacity
-        style={styles.cardContainer}
-        onPress={() => handleOnPressCardPoster(item.imdbID)}>
-        <Image
-          source={{uri: item.Poster}}
-          style={styles.posterImage}
-          resizeMode="cover"
-        />
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={() => toggleFavorite(item.imdbID)}>
-          {isFavorite ? (
-            <HeartSolidIcon size={24} color="red" />
-          ) : (
-            <HeartOutlineIcon size={24} color="white" />
-          )}
-        </TouchableOpacity>
-        <View style={styles.infoContainer}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.Title}
-          </Text>
-          <Text style={styles.year}>{item.Year}</Text>
-        </View>
-      </TouchableOpacity>
-    );
+    return <MovieCard navigation={navigation} item={item} />;
   };
 
   const ListFooterComponent = () => {
@@ -250,9 +197,16 @@ const Search = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {isErrorGetMovies ? error.message : ''}
-          </Text>
+          {isErrorGetMovies ? (
+            <Text style={styles.emptyText}>{error.message}</Text>
+          ) : isSuccessGetMovies && !fetchedData.length ? (
+            <>
+              <Text style={styles.emptyTitle}>No Movies Found</Text>
+              <Text style={styles.emptyText}>
+                We couldn't find any movies matching "{searchText}"
+              </Text>
+            </>
+          ) : null}
         </View>
       )}
     </SafeScreen>

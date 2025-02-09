@@ -13,7 +13,7 @@ export type RootStackParamList = {
   [PATHS.MoviesTabs]: undefined;
   [PATHS.Filter]: {
     currentSort: SortOption | null;
-    onApplyFilter: (option: SortOption) => void;
+    onApplyFilter: (option: SortOption | null) => void;
   };
 };
 

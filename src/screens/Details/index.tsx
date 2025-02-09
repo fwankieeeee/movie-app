@@ -1,5 +1,6 @@
 import { SafeScreen } from '@/components';
 import { RootStackParamList } from '@/navigation/types';
+import { fetchMovieById } from '@/services/api';
 import { favoritesStorage } from '@/services/storage';
 import getScoreColor from '@/utils/getScoreColor';
 import getStoredObjects from '@/utils/getStoredObject';
@@ -26,7 +27,6 @@ import {
   StarIcon,
 } from 'react-native-heroicons/solid';
 import styles from './styles';
-import { fetchMovieById } from '@/services/api';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'details'>;
 
@@ -38,11 +38,10 @@ const Details = () => {
   const {
     data: fetchedData,
     isLoading: isLoadingFetchMovieById,
-    isError: isErrorFetchMovieById,
-    error: errorFetchMovieById,
   } = useQuery({
     queryKey: ['movie', movieId],
     queryFn: () => fetchMovieById(movieId),
+    throwOnError: true,
   });
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -68,7 +67,6 @@ const Details = () => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("%c Line:70 🍩 movieId", "color:#e41a6a", movieId);
       fetchMovieById(movieId);
     }, [movieId, navigation]),
   );

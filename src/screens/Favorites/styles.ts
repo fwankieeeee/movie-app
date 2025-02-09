@@ -57,11 +57,6 @@ export default StyleSheet.create({
     marginHorizontal: 15,
     marginVertical: 10,
   },
-  posterImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-  },
   movieList: {
     flex: 1,
     padding: 10,
@@ -91,25 +86,6 @@ export default StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: 'capitalize',
   },
-  cardContainer: {
-    flex: 1,
-    padding: 10,
-  },
-  infoContainer: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  title: {
-    color: '#fff',
-    marginBottom: 5,
-    textTransform: 'capitalize',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  year: {
-    fontSize: 14,
-    color: 'gray',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -121,14 +97,5 @@ export default StyleSheet.create({
   },
   clearIcon: {
     paddingInlineEnd: 10,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
-    padding: 8,
-    zIndex: 1,
   },
 });

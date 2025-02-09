@@ -2,8 +2,6 @@ import { OMDB_API_KEY, OMDB_API_URL } from '@env';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
 
-console.log("%c Line:2 🥤 OMDB_API_URL", "color:#6ec1c2", OMDB_API_URL);
-
 export const useGetMovies = (searchTerm: string, movieType?: string) => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -37,7 +35,9 @@ export const useGetMovies = (searchTerm: string, movieType?: string) => {
       if (data.Error) throw data;
 
       return data.Search;
-    } catch (error: unknown) {}
+    } catch (error: unknown) {
+      // throw error;
+    }
   };
 
   return useInfiniteQuery({
@@ -48,6 +48,7 @@ export const useGetMovies = (searchTerm: string, movieType?: string) => {
       if (lastPage?.length === 0) return undefined;
       return pages.length + 1;
     },
-    // staleTime: Infinity,
+    staleTime: Infinity,
+    throwOnError: true,
   });
 };

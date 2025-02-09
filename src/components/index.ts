@@ -1,2 +1,2 @@
 export {default as SafeScreen} from './SafeScreen';
-export {default as CustomDrawerContent} from './CustomDrawerHeader';
+export {default as MovieCard} from './MovieCard';
