@@ -2,7 +2,7 @@ import {StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
   searchView: {
-    marginRight: "20%",
+    marginRight: '20%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -25,7 +25,7 @@ export default StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: '50%'
+    width: '50%',
   },
   searchInput: {
     height: 40,
@@ -33,7 +33,7 @@ export default StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
   },
-  
+
   skeletonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -125,9 +125,18 @@ export default StyleSheet.create({
   },
   columnWrapper: {
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   clearIcon: {
-    paddingInlineEnd: 10
-  }
+    paddingInlineEnd: 10,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 1,
+  },
 });

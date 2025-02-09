@@ -9,7 +9,11 @@ import {
   View,
 } from 'react-native';
 import styles from './styles';
-import {XCircleIcon, XMarkIcon} from 'react-native-heroicons/outline';
+import {
+  HeartIcon as HeartOutlineIcon,
+  XCircleIcon,
+} from 'react-native-heroicons/outline';
+import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
 import {useEffect, useRef, useState} from 'react';
 import {useDebounce} from '@/hooks/debounce';
 import {useFetchMovies} from '@/hooks';
@@ -20,9 +24,12 @@ import {
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
+import {favoritesStorage} from '@/services/storage';
+import getStoredObjects from '@/utils/getStoredObject';
 
 const Search = () => {
   const [searchText, setSearchText] = useState('');
+  const [, setFavorites] = useState([])
   const debouncedText = useDebounce(searchText.toLowerCase(), 500);
   const {dataCount, fetchedData, isLoading, error, handleFetchMovies} =
     useFetchMovies();
@@ -74,7 +81,20 @@ const Search = () => {
     });
   };
 
-  const renderItem = ({item}: {item: any}) => {
+  // helpers
+  const toggleFavorite = (movieId: string) => {
+    const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+    const newFavorites = favoritesList.includes(movieId)
+      ? favoritesList.filter((id: string) => id !== movieId)
+      : [...favoritesList, movieId];
+    setFavorites(newFavorites);
+    favoritesStorage.set('favorites', JSON.stringify(newFavorites));
+  };
+
+  const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
+    const favoritesList = getStoredObjects(favoritesStorage, 'favorites');
+    const isFavorite =
+      favoritesList && (favoritesList as string[]).includes(item.imdbID);
     return (
       <TouchableOpacity onPress={() => handleOnPressCardPoster(item.imdbID)}>
         <View style={styles.cardContainer}>
@@ -83,6 +103,15 @@ const Search = () => {
             style={styles.posterImage}
             resizeMode="cover"
           />
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={() => toggleFavorite(item.imdbID)}>
+            {isFavorite ? (
+              <HeartSolidIcon size={24} color="red" />
+            ) : (
+              <HeartOutlineIcon size={24} color="white" />
+            )}
+          </TouchableOpacity>
           <View style={styles.infoContainer}>
             <Text style={styles.title} numberOfLines={2}>
               {item.Title}
@@ -117,7 +146,9 @@ const Search = () => {
             placeholder="Search Movies"
           />
           {searchText.length > 0 && (
-            <TouchableOpacity style={styles.clearIcon} onPress={handleOnPressClear}>
+            <TouchableOpacity
+              style={styles.clearIcon}
+              onPress={handleOnPressClear}>
               <XCircleIcon size={25} color="black" />
             </TouchableOpacity>
           )}

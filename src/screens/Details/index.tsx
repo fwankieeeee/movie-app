@@ -1,16 +1,31 @@
 import {SafeScreen} from '@/components';
 import {useFetchMovies} from '@/hooks';
 import {RootStackParamList} from '@/navigation/types';
+import {favoritesStorage} from '@/services/storage';
+import getStoredObjects from '@/utils/getStoredObject';
 import {
   RouteProp,
   useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {useCallback} from 'react';
-import {ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {useCallback, useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {ChevronLeftIcon, StarIcon} from 'react-native-heroicons/solid';
 import styles from './styles';
+import {
+  HeartIcon as HeartOutlineIcon,
+  XCircleIcon,
+} from 'react-native-heroicons/outline';
+import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
+import getScoreColor from '@/utils/getScoreColor';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'details'>;
 
@@ -19,14 +34,33 @@ const Details = () => {
   const route = useRoute<DetailsScreenRouteProp>();
   const {handleFetchMovieById, isLoading, fetchedData} = useFetchMovies();
 
+  const movieId = route.params.imdbID;
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+    setIsFavorite(favoritesList.includes(movieId));
+  }, [movieId]);
+
   const handleBack = () => {
     navigation.goBack();
   };
 
+  // helpers
+  const toggleFavorite = () => {
+    const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+    const newFavorites = favoritesList.includes(movieId)
+      ? favoritesList.filter((id: string) => id !== movieId)
+      : [...favoritesList, movieId];
+    setIsFavorite(!isFavorite);
+    favoritesStorage.set('favorites', JSON.stringify(newFavorites));
+  };
+
   useFocusEffect(
     useCallback(() => {
-      handleFetchMovieById(route.params.imdbID);
-    }, [route.params.imdbID]),
+      handleFetchMovieById(movieId);
+    }, [movieId]),
   );
 
   return (
@@ -36,6 +70,15 @@ const Details = () => {
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <ChevronLeftIcon size={28} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={toggleFavorite}
+            style={styles.favoriteButton}>
+            {isFavorite ? (
+              <HeartSolidIcon size={28} color="red" />
+            ) : (
+              <HeartOutlineIcon size={28} color="white" />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -56,27 +99,61 @@ const Details = () => {
                 style={styles.posterImage}
                 resizeMode="cover"
               />
+              <View style={styles.posterOverlay}>
+                <Text style={styles.overlayTitle}>{fetchedData.Title}</Text>
+                <Text style={styles.overlayYear}>{fetchedData.Year}</Text>
+              </View>
             </View>
 
             {/* Movie Details */}
             <View style={styles.detailsContainer}>
-              <Text style={styles.title}>{fetchedData.Title}</Text>
-
-              {/* Rating and Year */}
-              <View style={styles.ratingContainer}>
-                <StarIcon size={20} color="gold" />
-                <Text style={styles.rating}>{fetchedData.imdbRating}</Text>
-                <Text style={styles.year}>• {fetchedData.Year}</Text>
-                <Text style={styles.runtime}>• {fetchedData.Runtime}</Text>
+              <View style={styles.statsContainer}>
+                <Text style={styles.statsText}>{fetchedData.Genre}</Text>
+                <Text style={styles.dotSeparator}>•</Text>
+                <Text style={styles.statsText}>{fetchedData.Runtime}</Text>
+                <Text style={styles.dotSeparator}>•</Text>
+                <View style={styles.ratingWrapper}>
+                  <StarIcon size={16} color="gold" />
+                  <Text style={styles.statsText}>{fetchedData.imdbRating}</Text>
+                </View>
               </View>
-
-              {/* Genre */}
-              <Text style={styles.genre}>{fetchedData.Genre}</Text>
 
               {/* Plot */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Plot</Text>
+                <Text style={styles.sectionTitle}>Synopsis</Text>
                 <Text style={styles.plot}>{fetchedData.Plot}</Text>
+              </View>
+
+              {/* Scores */}
+              <View style={styles.scoresContainer}>
+                <View style={styles.scoreItem}>
+                  <View
+                    style={[
+                      styles.scoreBox,
+                      {backgroundColor: getScoreColor(fetchedData.Metascore)},
+                    ]}>
+                    <Text style={styles.scoreValue}>
+                      {fetchedData.Metascore}
+                    </Text>
+                  </View>
+                  <Text style={styles.scoreLabel}>Score</Text>
+                </View>
+                <View style={styles.scoreItem}>
+                  <View style={[styles.scoreBox, {backgroundColor: '#f5c518'}]}>
+                    <Text style={styles.scoreValue}>
+                      {fetchedData.imdbRating}
+                    </Text>
+                  </View>
+                  <Text style={styles.scoreLabel}>Rating</Text>
+                </View>
+                <View style={styles.scoreItem}>
+                  <View style={[styles.scoreBox, {backgroundColor: '#6c757d'}]}>
+                    <Text style={styles.scoreValue}>
+                      {fetchedData.imdbVotes}
+                    </Text>
+                  </View>
+                  <Text style={styles.scoreLabel}>Votes</Text>
+                </View>
               </View>
 
               {/* Director */}
@@ -85,10 +162,20 @@ const Details = () => {
                 <Text style={styles.sectionText}>{fetchedData.Director}</Text>
               </View>
 
+              {/* Writer */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Writer</Text>
+                <Text style={styles.sectionText}>{fetchedData.Writer}</Text>
+              </View>
               {/* Cast */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Cast</Text>
                 <Text style={styles.sectionText}>{fetchedData.Actors}</Text>
+              </View>
+              {/* Awards */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Awards</Text>
+                <Text style={styles.sectionText}>{fetchedData.Awards}</Text>
               </View>
             </View>
           </>
