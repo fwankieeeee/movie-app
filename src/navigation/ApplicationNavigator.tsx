@@ -1,7 +1,7 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Home} from '../screens';
+import {Details, Home, Search} from '../screens';
 import PATHS from './paths';
 import {RootStackParamList} from './types';
 
@@ -13,6 +13,8 @@ const RootStack = () => {
       initialRouteName={PATHS.Home}
       screenOptions={{headerShown: false}}>
       <Stack.Screen name={PATHS.Home} component={Home} />
+      <Stack.Screen name={PATHS.Search} component={Search} />
+      <Stack.Screen name={PATHS.Details} component={Details} />
     </Stack.Navigator>
   );
 };

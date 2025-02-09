@@ -3,6 +3,7 @@ const PATHS = {
   Home: 'home',
   Details: 'details',
   Favorites: 'favorites',
+  Search: 'search',
 } as const;
 
 export default PATHS;

@@ -4,10 +4,11 @@ import PATHS from './paths';
 export type RootStackParamList = {
   [PATHS.Home]: undefined;
   [PATHS.Details]: {
-    id: number;
+    imdbID: string;
   };
   [PATHS.Favorites]: undefined;
   [PATHS.RootDrawer]: undefined;
+  [PATHS.Search]: undefined;
 };
 
 export type RootScreenProps<
