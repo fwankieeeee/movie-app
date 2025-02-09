@@ -17,27 +17,14 @@ export default StyleSheet.create({
     letterSpacing: 0.5,
     textTransform: 'capitalize',
   },
-  cardContainer: {
-    flex: 1,
-    padding: 10,
+  searchPromptContainer: {
+    marginHorizontal: 15,
+    marginVertical: 100,
   },
-  posterImage: {
-    width: 100,
-    height: 150,
-  },
-  infoContainer: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  title: {
+  searchPromptText: {
+    fontSize: 18,
     color: '#fff',
     marginBottom: 5,
-    textTransform: 'capitalize',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  year: {
-    fontSize: 14,
-    color: 'gray',
+    textAlign: 'center',
   },
 });
