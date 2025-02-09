@@ -1,7 +1,7 @@
-import {SafeScreen} from '@/components';
-import {useFetchMovies} from '@/hooks';
-import {RootStackParamList} from '@/navigation/types';
-import {favoritesStorage} from '@/services/storage';
+import { SafeScreen } from '@/components';
+import { useFetchMovies } from '@/hooks';
+import { RootStackParamList } from '@/navigation/types';
+import { favoritesStorage } from '@/services/storage';
 import getScoreColor from '@/utils/getScoreColor';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
@@ -10,7 +10,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {useCallback, useEffect, useState} from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -19,14 +20,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {HeartIcon as HeartOutlineIcon} from 'react-native-heroicons/outline';
+import { HeartIcon as HeartOutlineIcon } from 'react-native-heroicons/outline';
 import {
   ChevronLeftIcon,
   HeartIcon as HeartSolidIcon,
   StarIcon,
 } from 'react-native-heroicons/solid';
 import styles from './styles';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'details'>;
 
@@ -36,21 +36,13 @@ const Details = () => {
   const movieId = route.params.imdbID;
   const {handleFetchMovieById} = useFetchMovies();
 
-  const queryClient = useQueryClient();
   const {
     data: fetchedData,
-    isSuccess: isSuccessFetchMovieById,
     isLoading: isLoadingFetchMovieById,
   } = useQuery({
     queryKey: ['movie', movieId],
     queryFn: () => handleFetchMovieById(movieId),
   });
-
-  useEffect(() => {
-    if (isSuccessFetchMovieById) {
-      queryClient.invalidateQueries({queryKey: ['movies']});
-    }
-  }, [isSuccessFetchMovieById, queryClient]);
 
   const [isFavorite, setIsFavorite] = useState(false);
 

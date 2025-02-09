@@ -5,8 +5,7 @@ type MovieArgs = {
   page: number;
 };
 
-const {ODBM_API_KEY = 'b9bd48a6', ODBM_API_URL = 'https://www.omdbapi.com/'} =
-  process.env;
+
 
 type TMovieData = {
   Title: string;
@@ -16,6 +15,9 @@ type TMovieData = {
   Poster: string;
   [key: string]: any;
 };
+
+const {ODBM_API_KEY = 'b9bd48a6', ODBM_API_URL = 'https://www.omdbapi.com/'} =
+  process.env;
 
 export const useFetchMovies = () => {
   const [fetchedData, setFetchedData] = useState<TMovieData[]>([]);

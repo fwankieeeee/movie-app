@@ -26,7 +26,6 @@ const Favorites = () => {
     queries: favoritestList.map((movieId: string) => ({
       queryKey: ['movie', movieId],
       queryFn: () => handleFetchMovieById(movieId),
-      enabled: !!movieId,
     })),
   });
 

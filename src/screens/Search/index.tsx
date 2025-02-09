@@ -1,4 +1,16 @@
-import {SafeScreen} from '@/components';
+import { SafeScreen } from '@/components';
+import { useGetMovies } from '@/hooks';
+import { useDebounce } from '@/hooks/debounce';
+import PATHS from '@/navigation/paths';
+import { favoritesStorage } from '@/services/storage';
+import getStoredObjects from '@/utils/getStoredObject';
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,46 +20,42 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import styles from './styles';
+import { Image } from 'react-native-elements';
 import {
   HeartIcon as HeartOutlineIcon,
   XCircleIcon,
 } from 'react-native-heroicons/outline';
-import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
-import {useEffect, useRef, useState} from 'react';
-import {useDebounce} from '@/hooks/debounce';
-import {useFetchMovies} from '@/hooks';
-import {Image} from 'react-native-elements';
-import PATHS from '@/navigation/paths';
-import {
-  NavigationProp,
-  ParamListBase,
-  useNavigation,
-} from '@react-navigation/native';
-import {favoritesStorage} from '@/services/storage';
-import getStoredObjects from '@/utils/getStoredObject';
+import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
+import styles from './styles';
 
 const Search = () => {
+  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
-  const [, setFavorites] = useState([])
+  const [, setFavorites] = useState([]);
   const debouncedText = useDebounce(searchText.toLowerCase(), 500);
-  const {dataCount, fetchedData, isLoading, error, handleFetchMovies} =
-    useFetchMovies();
   const currentPageNumber = useRef(1);
+
+  const {
+    data,
+    isLoading,
+    isError: isErrorGetMovies,
+    error,
+    hasNextPage,
+    fetchNextPage,
+  } = useGetMovies(debouncedText);
+  const fetchedData = data?.pages
+    ?.filter(Boolean)
+    ?.flat();
+
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   useEffect(() => {
     if (debouncedText.length >= 3) {
-      handleFetchMovies({
-        page: currentPageNumber.current,
-        searchTerm: debouncedText,
-      });
+      fetchNextPage();
     }
-    currentPageNumber.current = 1;
 
     return () => {};
   }, [debouncedText]);
-
-  const navigation: NavigationProp<ParamListBase> = useNavigation();
 
   // handlers
   const handleOnPressCardPoster = (imdbID: string) => {
@@ -64,20 +72,20 @@ const Search = () => {
   };
 
   const handleOnEndReached = () => {
-    currentPageNumber.current += 1;
-    if (currentPageNumber.current <= Math.ceil(dataCount / 10)) {
-      handleFetchMovies({
-        page: currentPageNumber.current,
-        searchTerm: debouncedText,
-      });
+    if (!isLoading && hasNextPage) {
+      fetchNextPage();
     }
   };
 
   const handleOnRefresh = () => {
     currentPageNumber.current = 1;
-    handleFetchMovies({
-      page: currentPageNumber.current,
-      searchTerm: debouncedText,
+    fetchNextPage();
+  };
+
+  // actions
+  const invalidateQueries = () => {
+    queryClient.invalidateQueries({
+      queryKey: ['movie'],
     });
   };
 
@@ -89,6 +97,7 @@ const Search = () => {
       : [...favoritesList, movieId];
     setFavorites(newFavorites);
     favoritesStorage.set('favorites', JSON.stringify(newFavorites));
+    invalidateQueries();
   };
 
   const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
@@ -96,28 +105,28 @@ const Search = () => {
     const isFavorite =
       favoritesList && (favoritesList as string[]).includes(item.imdbID);
     return (
-      <TouchableOpacity onPress={() => handleOnPressCardPoster(item.imdbID)}>
-        <View style={styles.cardContainer}>
-          <Image
-            source={{uri: item.Poster}}
-            style={styles.posterImage}
-            resizeMode="cover"
-          />
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={() => toggleFavorite(item.imdbID)}>
-            {isFavorite ? (
-              <HeartSolidIcon size={24} color="red" />
-            ) : (
-              <HeartOutlineIcon size={24} color="white" />
-            )}
-          </TouchableOpacity>
-          <View style={styles.infoContainer}>
-            <Text style={styles.title} numberOfLines={2}>
-              {item.Title}
-            </Text>
-            <Text style={styles.year}>{item.Year}</Text>
-          </View>
+      <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={() => handleOnPressCardPoster(item.imdbID)}>
+        <Image
+          source={{uri: item.Poster}}
+          style={styles.posterImage}
+          resizeMode="cover"
+        />
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={() => toggleFavorite(item.imdbID)}>
+          {isFavorite ? (
+            <HeartSolidIcon size={24} color="red" />
+          ) : (
+            <HeartOutlineIcon size={24} color="white" />
+          )}
+        </TouchableOpacity>
+        <View style={styles.infoContainer}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.Title}
+          </Text>
+          <Text style={styles.year}>{item.Year}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -175,7 +184,9 @@ const Search = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>{error}</Text>
+          <Text style={styles.emptyText}>
+            {isErrorGetMovies ? error.message : ''}
+          </Text>
         </View>
       )}
     </SafeScreen>

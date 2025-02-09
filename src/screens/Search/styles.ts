@@ -17,6 +17,7 @@ export default StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 50,
     padding: 10,
+    marginBlockEnd: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -100,8 +101,8 @@ export default StyleSheet.create({
     textTransform: 'capitalize',
   },
   cardContainer: {
-    flex: 1,
-    padding: 10,
+    flex: 1/2,
+    margin: 4,
   },
   infoContainer: {
     flex: 1,
