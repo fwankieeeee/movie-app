@@ -2,7 +2,7 @@ import {SafeScreen} from '@/components';
 import {useGetMovies} from '@/hooks';
 import {useDebounce} from '@/hooks/debounce';
 import PATHS from '@/navigation/paths';
-import {favoritesStorage} from '@/services/storage';
+import {favoritesStorage, recentSearchStorage} from '@/services/storage';
 import {SortOption} from '@/types';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import {Image} from 'react-native-elements';
 import {
-  Bars3Icon,
+  ChevronLeftIcon,
   FunnelIcon,
   HeartIcon as HeartOutlineIcon,
   XCircleIcon,
@@ -38,25 +38,20 @@ const Search = () => {
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [, setFavorites] = useState([]);
-  const [filters, setFilters] = useState({
-    field: 'Title',
-    order: 'asc',
-    type: 'movie',
-  });
+  const [filters, setFilters] = useState<TFilters | null>(null);
 
   const debouncedText = useDebounce(searchText.toLowerCase(), 500);
   const {
     data,
     isLoading,
+    isFetching,
     isError: isErrorGetMovies,
     error,
     hasNextPage,
     refetch,
     fetchNextPage,
-    dataUpdatedAt,
-  } = useGetMovies(debouncedText, filters.type);
+  } = useGetMovies(debouncedText, filters?.type);
   const fetchedData = data?.pages?.filter(Boolean)?.flat() ?? [];
-  console.log('%c Line:57 🍐 fetchedData', 'color:#f5ce50', fetchedData);
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
@@ -64,16 +59,20 @@ const Search = () => {
     if (debouncedText.length >= 3) {
       fetchNextPage();
     }
+    queryClient.resetQueries();
 
     return () => {};
   }, [debouncedText]);
 
   useEffect(() => {
     refetch();
-  }, [filters.type]);
+  }, [filters?.type]);
 
   const memoizedFetchedData = useMemo(() => {
     // Sort your movie list here based on the option
+    if (!filters) {
+      return fetchedData;
+    }
     const sortedMovies = fetchedData.sort((a, b) => {
       const aValue = a[filters.field];
       const bValue = b[filters.field];
@@ -89,9 +88,7 @@ const Search = () => {
   const handleApplyFilter = (filter: TFilters) => {
     setFilters(filter);
   };
-  const handleOnPressDrawerOpen = () => {
-    navigation.dispatch(DrawerActions.toggleDrawer());
-  };
+
   const handleOnPressFilter = () => {
     navigation.navigate(PATHS.Filter, {
       onApplyFilter: handleApplyFilter,
@@ -100,6 +97,12 @@ const Search = () => {
   };
 
   const handleOnPressCardPoster = (imdbID: string) => {
+    const recentSearchesIds =
+      getStoredObjects(recentSearchStorage, 'recent') ?? [];
+    recentSearchStorage.set(
+      'recent',
+      JSON.stringify([...recentSearchesIds, imdbID]),
+    );
     navigation.navigate(PATHS.Details, {imdbID});
   };
 
@@ -109,11 +112,10 @@ const Search = () => {
 
   const handleOnPressClear = () => {
     setSearchText('');
-    navigation.goBack();
   };
 
   const handleOnEndReached = () => {
-    if (!isLoading && hasNextPage) {
+    if (!isFetching && hasNextPage) {
       fetchNextPage();
     }
   };
@@ -122,11 +124,8 @@ const Search = () => {
     fetchNextPage();
   };
 
-  // actions
-  const invalidateQueries = () => {
-    queryClient.invalidateQueries({
-      queryKey: ['movie'],
-    });
+  const handleBack = () => {
+    navigation.goBack();
   };
 
   // helpers
@@ -137,7 +136,6 @@ const Search = () => {
       : [...favoritesList, movieId];
     setFavorites(newFavorites);
     favoritesStorage.set('favorites', JSON.stringify(newFavorites));
-    invalidateQueries();
   };
 
   const renderItem = ({item}: {item: {imdbID: string; [key: string]: any}}) => {
@@ -186,8 +184,8 @@ const Search = () => {
   return (
     <SafeScreen>
       <View style={styles.searchView}>
-        <TouchableOpacity onPress={handleOnPressDrawerOpen}>
-          <Bars3Icon strokeWidth={2} size={20} color="#fff" />
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <ChevronLeftIcon size={28} color="white" />
         </TouchableOpacity>
         <View style={styles.inputContainer}>
           <TextInput
@@ -197,20 +195,41 @@ const Search = () => {
             placeholderTextColor="lightgray"
             placeholder="Search Movies"
           />
-          {searchText.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearIcon}
-              onPress={handleOnPressClear}>
+          {searchText.length > 0 && isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color="black"
+              style={styles.loadingIndicator}
+            />
+          ) : searchText.length > 0 ? (
+            <TouchableOpacity onPress={handleOnPressClear}>
               <XCircleIcon size={25} color="black" />
             </TouchableOpacity>
+          ) : (
+            <View style={styles.emptySearchIcon} />
           )}
         </View>
         {/* filter and sort */}
-        <TouchableOpacity onPress={handleOnPressFilter}>
-          <FunnelIcon strokeWidth={2} size={20} color="#fff" />
+        <TouchableOpacity
+          style={styles.filterSearchIcon}
+          onPress={handleOnPressFilter}>
+          <FunnelIcon strokeWidth={2} size={25} color="#fff" />
         </TouchableOpacity>
       </View>
-      {fetchedData && fetchedData.length > 0 ? (
+
+      {!searchText ? (
+        <View style={styles.welcomeContainer}>
+          <Image
+            source={require('@/assets/images/undraw_horror-movie_9020.png')}
+            style={styles.welcomeImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.welcomeTitle}>Discover Movies</Text>
+          <Text style={styles.welcomeText}>
+            Search for your favorite movies, TV shows, and more
+          </Text>
+        </View>
+      ) : fetchedData && fetchedData.length > 0 ? (
         <FlatList
           data={memoizedFetchedData}
           numColumns={2}
@@ -223,7 +242,7 @@ const Search = () => {
           ListFooterComponent={ListFooterComponent}
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
+              refreshing={isFetching}
               onRefresh={handleOnRefresh}
               tintColor="#fff"
             />

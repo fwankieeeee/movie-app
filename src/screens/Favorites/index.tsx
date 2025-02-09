@@ -1,35 +1,45 @@
 import { SafeScreen } from '@/components';
-import { useFetchMovies } from '@/hooks';
 import PATHS from '@/navigation/paths';
+import { fetchMovieById } from '@/services/api';
 import { favoritesStorage } from '@/services/storage';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
-  DrawerActions,
   NavigationProp,
   ParamListBase,
+  useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import { useQueries } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'react-native-elements';
-import { Bars3Icon, HeartIcon as HeartOutlineIcon, MagnifyingGlassIcon } from 'react-native-heroicons/outline';
+import { HeartIcon as HeartOutlineIcon } from 'react-native-heroicons/outline';
 import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
 import homeStyles from '../Home/styles';
 import styles from './styles';
 
+const getFavorites = () => {
+  const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+  return favoritesList;
+};
+
 const Favorites = () => {
   const navigation: NavigationProp<ParamListBase> = useNavigation();
-  const {handleFetchMovieById} = useFetchMovies();
-  const favoritestList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+  const [favoritesList, setFavoritesList] = useState(getFavorites());
   const favoritesQueries = useQueries({
-    queries: favoritestList.map((movieId: string) => ({
-      queryKey: ['movie', movieId],
-      queryFn: () => handleFetchMovieById(movieId),
+    queries: favoritesList.map((movieId: string) => ({
+      queryKey: ['movie', movieId, navigation],
+      queryFn: () => fetchMovieById(movieId),
     })),
   });
 
-  const [, setFavorites] = useState([]);
+  const [localFavorites, setLocalFavorites] = useState([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setFavoritesList(getFavorites());
+    }, [navigation, localFavorites]),
+  );
 
   const fetchedMoviesData = favoritesQueries.reduce((acc: any, item) => {
     const {isSuccess, data} = item;
@@ -38,29 +48,18 @@ const Favorites = () => {
     }
     return acc;
   }, []);
-  
-  console.log("%c Line:110 🥔 fetchedMoviesData", "color:#4fff4B", fetchedMoviesData);
-
 
   // handlers
   const handleOnPressCardPoster = (imdbID: string) => {
     navigation.navigate(PATHS.Details, {imdbID});
   };
 
-  const handleOnPressSearch = () => {
-    navigation.navigate(PATHS.Search);
-  };
-
-  const handleOnPressDrawerOpen = () => {
-    navigation.dispatch(DrawerActions.toggleDrawer());
-  };
-
   const toggleFavorite = (movieId: string) => {
-    const favoritesList = getStoredObjects(favoritesStorage, 'favorites') ?? [];
+    const favoritesList = getFavorites();
     const newFavorites = favoritesList.includes(movieId)
       ? favoritesList.filter((id: string) => id !== movieId)
       : [...favoritesList, movieId];
-    setFavorites(newFavorites);
+    setLocalFavorites(newFavorites);
     favoritesStorage.set('favorites', JSON.stringify(newFavorites));
   };
 
@@ -69,28 +68,28 @@ const Favorites = () => {
     const isFavorite =
       favoritesList && (favoritesList as string[]).includes(item.imdbID);
     return (
-      <TouchableOpacity onPress={() => handleOnPressCardPoster(item.imdbID)}>
-        <View style={styles.cardContainer}>
-          <Image
-            source={{uri: item.Poster}}
-            style={styles.posterImage}
-            resizeMode="cover"
-          />
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={() => toggleFavorite(item.imdbID)}>
-            {isFavorite ? (
-              <HeartSolidIcon size={24} color="red" />
-            ) : (
-              <HeartOutlineIcon size={24} color="white" />
-            )}
-          </TouchableOpacity>
-          <View style={styles.infoContainer}>
-            <Text style={styles.title} numberOfLines={2}>
-              {item.Title}
-            </Text>
-            <Text style={styles.year}>{item.Year}</Text>
-          </View>
+      <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={() => handleOnPressCardPoster(item.imdbID)}>
+        <Image
+          source={{uri: item.Poster}}
+          style={styles.posterImage}
+          resizeMode="cover"
+        />
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={() => toggleFavorite(item.imdbID)}>
+          {isFavorite ? (
+            <HeartSolidIcon size={24} color="red" />
+          ) : (
+            <HeartOutlineIcon size={24} color="white" />
+          )}
+        </TouchableOpacity>
+        <View style={styles.infoContainer}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.Title}
+          </Text>
+          <Text style={styles.year}>{item.Year}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -99,13 +98,7 @@ const Favorites = () => {
   return (
     <SafeScreen>
       <View style={homeStyles.headerView}>
-        <TouchableOpacity onPress={handleOnPressDrawerOpen}>
-          <Bars3Icon strokeWidth={2} size={20} color="#fff" />
-        </TouchableOpacity>
         <Text style={homeStyles.headerTitle}>Favorites</Text>
-        <TouchableOpacity onPress={handleOnPressSearch}>
-          <MagnifyingGlassIcon strokeWidth={2} size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
       <FlatList
         data={fetchedMoviesData}

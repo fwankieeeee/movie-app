@@ -1,6 +1,6 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import PATHS from './paths';
-import { SortOption } from '@/screens/Filter';
+import { SortOption } from '@/types';
 
 export type RootStackParamList = {
   [PATHS.Home]: undefined;
@@ -12,7 +12,7 @@ export type RootStackParamList = {
   [PATHS.Search]: undefined;
   [PATHS.MoviesTabs]: undefined;
   [PATHS.Filter]: {
-    currentSort: SortOption;
+    currentSort: SortOption | null;
     onApplyFilter: (option: SortOption) => void;
   };
 };

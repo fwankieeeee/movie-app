@@ -18,6 +18,7 @@ export default StyleSheet.create({
     borderRadius: 50,
     padding: 10,
     marginBlockEnd: 10,
+    marginInlineEnd: 30,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -26,11 +27,17 @@ export default StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: '50%',
+  },
+  loadingIndicator: {
+    transform: [{scale: 1.2}],
+    marginHorizontal: 8,
+  },
+  emptySearchIcon: {
+    width: 24,
+    height: 24,
+    marginLeft: 8,
   },
   searchInput: {
-    height: 40,
-    borderRadius: 50,
     padding: 10,
     backgroundColor: '#fff',
   },
@@ -51,6 +58,9 @@ export default StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  filterSearchIcon: {
+    paddingInlineEnd: 25,
   },
   skeletonItem: {
     width: '48%',
@@ -101,7 +111,7 @@ export default StyleSheet.create({
     textTransform: 'capitalize',
   },
   cardContainer: {
-    flex: 1/2,
+    flex: 1 / 2,
     margin: 4,
   },
   infoContainer: {
@@ -139,5 +149,35 @@ export default StyleSheet.create({
     borderRadius: 20,
     padding: 8,
     zIndex: 1,
+  },
+  backButton: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 8,
+    width: 44,
+  },
+  welcomeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  welcomeImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });

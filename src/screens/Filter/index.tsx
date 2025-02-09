@@ -24,10 +24,10 @@ const Filter = () => {
   const navigation = useNavigation();
   const {onApplyFilter, currentSort} = router.params;
   const [sortField, setSortField] = useState<SortOption['field']>(
-    currentSort.field,
+    currentSort?.field ?? 'Title',
   );
   const [sortOrder, setSortOrder] = useState<SortOption['order']>(
-    currentSort.order,
+    currentSort?.order ?? 'asc',
   );
   const [selectedType, setSelectedType] = useState('movie');
 

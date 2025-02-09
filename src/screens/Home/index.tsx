@@ -17,17 +17,9 @@ const Home = () => {
     navigation.navigate(PATHS.Search);
   };
 
-  const handleOnPressDrawerOpen = () => {
-    navigation.dispatch(DrawerActions.toggleDrawer());
-  };
-
   return (
     <SafeScreen>
       <View style={styles.headerView}>
-        {/* TODO: make a component out of this */}
-        <TouchableOpacity onPress={handleOnPressDrawerOpen}>
-          <Bars3Icon strokeWidth={2} size={20} color="#fff" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Top Rated Movies</Text>
         <TouchableOpacity onPress={handleOnPressSearch}>
           <MagnifyingGlassIcon strokeWidth={2} size={20} color="#fff" />

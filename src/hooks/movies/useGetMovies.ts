@@ -1,13 +1,15 @@
-import {useInfiniteQuery} from '@tanstack/react-query';
-import {useRef} from 'react';
+import { OMDB_API_KEY, OMDB_API_URL } from '@env';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useRef } from 'react';
 
-const {ODBM_API_KEY = 'b9bd48a6', ODBM_API_URL = 'https://www.omdbapi.com/'} =
-  process.env;
+console.log("%c Line:2 🥤 OMDB_API_URL", "color:#6ec1c2", OMDB_API_URL);
 
-export const useGetMovies = (searchTerm: string, movieType: string) => {
+export const useGetMovies = (searchTerm: string, movieType?: string) => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFetchMovies = async ({pageParam = 1}) => {
+    if (!searchTerm) return;
+
     // Abort the previous request if it's still pending
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -20,12 +22,12 @@ export const useGetMovies = (searchTerm: string, movieType: string) => {
     abortControllerRef.current = abortController;
 
     const params = new URLSearchParams({
-      apikey: ODBM_API_KEY!,
+      ...(movieType && {type: movieType}),
+      apikey: OMDB_API_KEY!,
       s: searchTerm,
-      type: movieType,
       page: pageParam.toString(),
     });
-    const url = `${ODBM_API_URL}?${params.toString()}`;
+    const url = `${OMDB_API_URL}?${params.toString()}`;
     try {
       const response = await fetch(url, {
         signal,
@@ -35,13 +37,7 @@ export const useGetMovies = (searchTerm: string, movieType: string) => {
       if (data.Error) throw data;
 
       return data.Search;
-    } catch (error: unknown) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.error('Request aborted');
-      } else {
-        console.error(error);
-      }
-    }
+    } catch (error: unknown) {}
   };
 
   return useInfiniteQuery({
@@ -52,5 +48,6 @@ export const useGetMovies = (searchTerm: string, movieType: string) => {
       if (lastPage?.length === 0) return undefined;
       return pages.length + 1;
     },
+    // staleTime: Infinity,
   });
 };

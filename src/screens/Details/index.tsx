@@ -1,5 +1,4 @@
 import { SafeScreen } from '@/components';
-import { useFetchMovies } from '@/hooks';
 import { RootStackParamList } from '@/navigation/types';
 import { favoritesStorage } from '@/services/storage';
 import getScoreColor from '@/utils/getScoreColor';
@@ -27,6 +26,7 @@ import {
   StarIcon,
 } from 'react-native-heroicons/solid';
 import styles from './styles';
+import { fetchMovieById } from '@/services/api';
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'details'>;
 
@@ -34,14 +34,15 @@ const Details = () => {
   const navigation = useNavigation();
   const route = useRoute<DetailsScreenRouteProp>();
   const movieId = route.params.imdbID;
-  const {handleFetchMovieById} = useFetchMovies();
 
   const {
     data: fetchedData,
     isLoading: isLoadingFetchMovieById,
+    isError: isErrorFetchMovieById,
+    error: errorFetchMovieById,
   } = useQuery({
     queryKey: ['movie', movieId],
-    queryFn: () => handleFetchMovieById(movieId),
+    queryFn: () => fetchMovieById(movieId),
   });
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -67,7 +68,8 @@ const Details = () => {
 
   useFocusEffect(
     useCallback(() => {
-      handleFetchMovieById(movieId);
+      console.log("%c Line:70 🍩 movieId", "color:#e41a6a", movieId);
+      fetchMovieById(movieId);
     }, [movieId, navigation]),
   );
 
