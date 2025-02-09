@@ -1,6 +1,6 @@
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import PATHS from './paths';
 import { SortOption } from '@/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import PATHS from './paths';
 
 export type RootStackParamList = {
   [PATHS.Home]: undefined;

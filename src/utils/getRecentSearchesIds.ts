@@ -1,4 +1,4 @@
-import { favoritesStorage, recentSearchStorage } from "@/services/storage";
+import { recentSearchStorage } from "@/services/storage";
 import getStoredObjects from "./getStoredObject";
 
 const getRecentSearchesIds = () => {

@@ -1,11 +1,11 @@
 import PATHS from '@/navigation/paths';
-import {favoritesStorage, recentSearchStorage} from '@/services/storage';
+import { favoritesStorage, recentSearchStorage } from '@/services/storage';
 import getStoredObjects from '@/utils/getStoredObject';
-import React, {useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {Image} from 'react-native-elements';
-import {HeartIcon as HeartOutlineIcon} from 'react-native-heroicons/outline';
-import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
+import React, { useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'react-native-elements';
+import { HeartIcon as HeartOutlineIcon } from 'react-native-heroicons/outline';
+import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
 import styles from './styles';
 
 type IMovieCardProps = {

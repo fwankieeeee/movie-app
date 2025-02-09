@@ -1,6 +1,6 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   HeartIcon as HeartOutlineIcon,
   HomeIcon as HomeOutlineIcon,
@@ -9,10 +9,10 @@ import {
   HeartIcon as HeartSolidIcon,
   HomeIcon as HomeSolidIcon,
 } from 'react-native-heroicons/solid';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Details, Favorites, Filter, Home, Search} from '../screens';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Details, Favorites, Filter, Home, Search } from '../screens';
 import PATHS from './paths';
-import {RootStackParamList} from './types';
+import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const BottomTabStack = createBottomTabNavigator();

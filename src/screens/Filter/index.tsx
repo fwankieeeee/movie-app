@@ -1,21 +1,21 @@
-import {SafeScreen} from '@/components';
-import React, {useCallback, useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
-import styles from './styles';
-import {RadioButton} from 'react-native-paper';
+import { SafeScreen } from '@/components';
+import { typeData } from '@/constants';
+import { RootStackParamList } from '@/navigation/types';
+import { filtersStorage } from '@/services/storage';
+import { SortOption } from '@/types';
+import getStoredObjects from '@/utils/getStoredObject';
 import {
   RouteProp,
   useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {RootStackParamList} from '@/navigation/types';
-import {SortOption} from '@/types';
-import {ChevronLeftIcon} from 'react-native-heroicons/outline';
-import {typeData} from '@/constants';
-import {Dropdown} from 'react-native-element-dropdown';
-import {filtersStorage} from '@/services/storage';
-import getStoredObjects from '@/utils/getStoredObject';
+import React, { useCallback, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
+import { ChevronLeftIcon } from 'react-native-heroicons/outline';
+import { RadioButton } from 'react-native-paper';
+import styles from './styles';
 
 type FilterScreenRouteProp = RouteProp<RootStackParamList, 'filter'>;
 
