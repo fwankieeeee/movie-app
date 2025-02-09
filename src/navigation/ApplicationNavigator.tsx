@@ -1,5 +1,4 @@
 import CustomDrawerHeader from '@/components/CustomDrawerHeader';
-import Favorites from '@/screens/Favorites';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {NavigationContainer} from '@react-navigation/native';
@@ -13,7 +12,7 @@ import {
   HomeIcon as HomeSolidIcon,
 } from 'react-native-heroicons/solid';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Details, Home, Search} from '../screens';
+import {Details, Favorites, Filter, Home, Search} from '../screens';
 import PATHS from './paths';
 import {RootStackParamList} from './types';
 
@@ -29,6 +28,7 @@ const MainStack = () => {
       <Stack.Screen name={PATHS.MoviesTabs} component={MoviesTabs} />
       <Stack.Screen name={PATHS.Search} component={Search} />
       <Stack.Screen name={PATHS.Details} component={Details} />
+      <Stack.Screen name={PATHS.Filter} component={Filter} />
     </Stack.Navigator>
   );
 };

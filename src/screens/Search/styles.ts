@@ -2,7 +2,7 @@ import {StyleSheet} from 'react-native';
 
 export default StyleSheet.create({
   searchView: {
-    marginRight: '20%',
+    // marginRight: '20%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

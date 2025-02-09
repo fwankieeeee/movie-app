@@ -68,7 +68,7 @@ const Details = () => {
   useFocusEffect(
     useCallback(() => {
       handleFetchMovieById(movieId);
-    }, [movieId]),
+    }, [movieId, navigation]),
   );
 
   return (

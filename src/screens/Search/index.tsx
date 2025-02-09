@@ -1,16 +1,18 @@
-import { SafeScreen } from '@/components';
-import { useGetMovies } from '@/hooks';
-import { useDebounce } from '@/hooks/debounce';
+import {SafeScreen} from '@/components';
+import {useGetMovies} from '@/hooks';
+import {useDebounce} from '@/hooks/debounce';
 import PATHS from '@/navigation/paths';
-import { favoritesStorage } from '@/services/storage';
+import {favoritesStorage} from '@/services/storage';
+import {SortOption} from '@/types';
 import getStoredObjects from '@/utils/getStoredObject';
 import {
+  DrawerActions,
   NavigationProp,
   ParamListBase,
   useNavigation,
 } from '@react-navigation/native';
-import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import {useQueryClient} from '@tanstack/react-query';
+import {useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -20,32 +22,41 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Image } from 'react-native-elements';
+import {Image} from 'react-native-elements';
 import {
+  Bars3Icon,
+  FunnelIcon,
   HeartIcon as HeartOutlineIcon,
   XCircleIcon,
 } from 'react-native-heroicons/outline';
-import { HeartIcon as HeartSolidIcon } from 'react-native-heroicons/solid';
+import {HeartIcon as HeartSolidIcon} from 'react-native-heroicons/solid';
 import styles from './styles';
+
+type TFilters = SortOption & {type: 'movie' | 'episodes' | 'series'};
 
 const Search = () => {
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [, setFavorites] = useState([]);
-  const debouncedText = useDebounce(searchText.toLowerCase(), 500);
-  const currentPageNumber = useRef(1);
+  const [filters, setFilters] = useState({
+    field: 'Title',
+    order: 'asc',
+    type: 'movie',
+  });
 
+  const debouncedText = useDebounce(searchText.toLowerCase(), 500);
   const {
     data,
     isLoading,
     isError: isErrorGetMovies,
     error,
     hasNextPage,
+    refetch,
     fetchNextPage,
-  } = useGetMovies(debouncedText);
-  const fetchedData = data?.pages
-    ?.filter(Boolean)
-    ?.flat();
+    dataUpdatedAt,
+  } = useGetMovies(debouncedText, filters.type);
+  const fetchedData = data?.pages?.filter(Boolean)?.flat() ?? [];
+  console.log('%c Line:57 🍐 fetchedData', 'color:#f5ce50', fetchedData);
 
   const navigation: NavigationProp<ParamListBase> = useNavigation();
 
@@ -57,7 +68,37 @@ const Search = () => {
     return () => {};
   }, [debouncedText]);
 
+  useEffect(() => {
+    refetch();
+  }, [filters.type]);
+
+  const memoizedFetchedData = useMemo(() => {
+    // Sort your movie list here based on the option
+    const sortedMovies = fetchedData.sort((a, b) => {
+      const aValue = a[filters.field];
+      const bValue = b[filters.field];
+      if (filters.order === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      }
+      return aValue < bValue ? 1 : -1;
+    });
+    return sortedMovies;
+  }, [fetchedData, filters]);
+
   // handlers
+  const handleApplyFilter = (filter: TFilters) => {
+    setFilters(filter);
+  };
+  const handleOnPressDrawerOpen = () => {
+    navigation.dispatch(DrawerActions.toggleDrawer());
+  };
+  const handleOnPressFilter = () => {
+    navigation.navigate(PATHS.Filter, {
+      onApplyFilter: handleApplyFilter,
+      currentSort: filters,
+    });
+  };
+
   const handleOnPressCardPoster = (imdbID: string) => {
     navigation.navigate(PATHS.Details, {imdbID});
   };
@@ -78,7 +119,6 @@ const Search = () => {
   };
 
   const handleOnRefresh = () => {
-    currentPageNumber.current = 1;
     fetchNextPage();
   };
 
@@ -146,6 +186,9 @@ const Search = () => {
   return (
     <SafeScreen>
       <View style={styles.searchView}>
+        <TouchableOpacity onPress={handleOnPressDrawerOpen}>
+          <Bars3Icon strokeWidth={2} size={20} color="#fff" />
+        </TouchableOpacity>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.searchInput}
@@ -162,10 +205,14 @@ const Search = () => {
             </TouchableOpacity>
           )}
         </View>
+        {/* filter and sort */}
+        <TouchableOpacity onPress={handleOnPressFilter}>
+          <FunnelIcon strokeWidth={2} size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
       {fetchedData && fetchedData.length > 0 ? (
         <FlatList
-          data={fetchedData}
+          data={memoizedFetchedData}
           numColumns={2}
           showsVerticalScrollIndicator
           columnWrapperStyle-={styles.columnWrapper}

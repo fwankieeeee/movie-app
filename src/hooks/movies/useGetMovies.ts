@@ -4,17 +4,7 @@ import {useRef} from 'react';
 const {ODBM_API_KEY = 'b9bd48a6', ODBM_API_URL = 'https://www.omdbapi.com/'} =
   process.env;
 
-type TMovieData = {
-  Title: string;
-  Year: string;
-  imdbID: string;
-  Type: string;
-  Poster: string;
-  [key: string]: any;
-};
-
-
-export const useGetMovies = (searchTerm: string) => {
+export const useGetMovies = (searchTerm: string, movieType: string) => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFetchMovies = async ({pageParam = 1}) => {
@@ -32,6 +22,7 @@ export const useGetMovies = (searchTerm: string) => {
     const params = new URLSearchParams({
       apikey: ODBM_API_KEY!,
       s: searchTerm,
+      type: movieType,
       page: pageParam.toString(),
     });
     const url = `${ODBM_API_URL}?${params.toString()}`;
