@@ -8,7 +8,7 @@ An intuitive iOS-focused mobile application built with React Native that allows 
   <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/movie-details.png" />
   <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/recent-searches.png" />
   <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/search-results-with-favorites.png" />
-  <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/search-results-with-favorites.png" />
+  <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/search-results.png" />
   <img width="30%" height="50%" src="https://github.com/fwankieeeee/movie-app/blob/main/src/screenshots/with-favorites.png" />
 </p>
 
